@@ -2,7 +2,7 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\WorkoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,8 +19,10 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-// Registrera användare
-$router->get('/register', 'UserController@showRegister');
-$router->post('/register', 'UserController@register');
+$router->get('/workouts', 'WorkoutController@workouts');
+$router->get('/workouts/stats', 'WorkoutController@stats');
+$router->get('/workouts/{id}', 'WorkoutController@show');
 
-
+$router->post('/workouts', 'WorkoutController@store');
+$router->patch('/workouts/{id}', 'WorkoutController@update');
+$router->delete('/workouts/{id}', 'WorkoutController@delete');
