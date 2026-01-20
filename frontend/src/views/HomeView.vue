@@ -4,8 +4,6 @@ import TrainingForm from '@/components/TrainingForm.vue'
 
 <template>
   <div class="home-view">
-    <h1>Mina Träningar</h1>
-
     <TrainingForm />
   </div>
 </template>

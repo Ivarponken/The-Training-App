@@ -4,6 +4,7 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <template>
   <div id="app">
+
     <nav>
       <RouterLink to="/">Träningar</RouterLink>
       <RouterLink to="/stats">Statistik</RouterLink>
@@ -22,6 +23,7 @@ nav {
   padding: 20px;
   background: #f5f5f5;
 }
+
 
 nav a {
   text-decoration: none;
