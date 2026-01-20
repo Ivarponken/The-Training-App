@@ -2,7 +2,7 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\WorkoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,3 +24,5 @@ $router->get('/register', 'UserController@showRegister');
 $router->post('/register', 'UserController@register');
 
 
+
+$router->get('/workouts', 'WorkoutController@workouts');
