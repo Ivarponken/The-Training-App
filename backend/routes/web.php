@@ -3,7 +3,9 @@
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 use App\Http\Controllers\WorkoutController;
-
+$router->options('{any:.*}', function () {
+    return response('', 200);
+});
 /*
 |--------------------------------------------------------------------------
 | Application Routes
