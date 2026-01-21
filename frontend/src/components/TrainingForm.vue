@@ -54,7 +54,7 @@ function submitWorkout() {
       <hr />
 
       <p>Hur långt/mycket var aktiviteten</p>
-      <input type="text" v-model.number="form.distance" placeholder="200 meter / 20 reps" />
+      <input type="text" v-model="form.distance" placeholder="200 meter / 20 reps" />
       <hr />
 
       <p>Hur många minuter gjorde du det</p>
