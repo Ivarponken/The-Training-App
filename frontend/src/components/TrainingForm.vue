@@ -1,25 +1,27 @@
-<script setup></script>
+<script setup>
+
+</script>
 
 <template>
   <div class="training-form">
     <h2>Tränings Formulär</h2>
     <p>När aktiviteten är gjord</p>
-<input type="date" id="date">
+<input type="date" id="when" required="true">
     <hr />
     <p>Vad för aktivitet</p>
-    <input type="text" id="activity" placeholder="Skriv aktivitet här">
+    <input type="text" id="activity" placeholder="Skriv aktivitet här" required="true">
     <hr />
     <p>Info om vad du gjorde</p>
-    <input type="text" id="info" placeholder="Skriv info här">
+    <input type="text" id="details" placeholder="Skriv info här">
     <hr />
     <p>Hur jobbigt var aktiviteten</p>
-    <input type="number" id="intensity" min="0" max="10" placeholder="Skala 1-10 1 = väldigt lätt 10 = väldigt jobbigt">
+    <input type="number" id="borg_scale" min="0" max="10" placeholder="Skala 1-10 1 = väldigt lätt 10 = väldigt jobbigt" required="true">
     <hr />
     <p>Hur långt/mycket var aktiviteten</p>
-    <input type="text" id="length" placeholder="200 meter / 20 reps">
+    <input type="text" id="distance" placeholder="200 meter / 20 reps">
     <hr />
     <p>Hur många timmar gjorde du det</p>
-    <input type="time" id="time">
+    <input type="time" id="duration" required="true">
     <hr />
     <br>
     <button type="submit">Spara träning</button>
@@ -36,7 +38,7 @@
 }
 
 h2 {
-  color: #42b983;
+  color: #da7618;
 }
 input {
   width: 100%;
@@ -49,10 +51,10 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #42b983;
+  border-color: #da7618;
 }
 button {
-  background-color: #42b983;
+  background-color: #da7618;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -62,6 +64,6 @@ button {
   font-size: 16px;
 }
 button:hover {
-  background-color: #369870;
+  background-color: rgb(173, 88, 7)
 }
 </style>

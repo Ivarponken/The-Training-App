@@ -1,0 +1,22 @@
+<script setup>
+</script>
+
+<template>
+  <div class="home-view">
+    <p>list</p>
+  </div>
+</template>
+
+<style scoped>
+.home-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+</style>
