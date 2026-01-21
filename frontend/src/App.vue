@@ -7,7 +7,10 @@ import { RouterLink, RouterView } from 'vue-router'
 
     <nav>
       <RouterLink to="/">Träningar</RouterLink>
+      <RouterLink to="/lista">Lista</RouterLink>
       <RouterLink to="/stats">Statistik</RouterLink>
+      <p style="cursor: pointer;">SE</p>
+      <p style="cursor: pointer;">ENG</p>
     </nav>
 
     <main>
@@ -27,12 +30,12 @@ nav {
 
 nav a {
   text-decoration: none;
-  color: #333;
+  color: gray;
   font-weight: bold;
 }
 
 nav a.router-link-active {
-  color: #42b983;
+  color: #da7618;
 }
 
 main {
