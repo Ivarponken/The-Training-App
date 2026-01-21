@@ -1,33 +1,70 @@
 <script setup>
+import { reactive } from 'vue'
 
+const form = reactive({
+  when: '',
+  activity: '',
+  details: '',
+  borg_scale: 0,
+  distance: 0,
+  duration: 0,
+})
+
+function submitWorkout() {
+  fetch('http://localhost:8080/workouts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(form),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log('Workout saved:', data)
+      alert('Träning sparad!')
+      form.when = ''
+      form.activity = ''
+      form.details = ''
+      form.borg_scale = 0
+      form.distance = 0
+      form.duration = 0
+    })
+    .catch((err) => console.error(err))
+}
 </script>
+
 
 <template>
   <div class="training-form">
     <h2>Tränings Formulär</h2>
-    <p>När aktiviteten är gjord</p>
-<input type="date" id="when" required="true">
-    <hr />
-    <p>Vad för aktivitet</p>
-    <input type="text" id="activity" placeholder="Skriv aktivitet här" required="true">
-    <hr />
-    <p>Info om vad du gjorde</p>
-    <input type="text" id="details" placeholder="Skriv info här">
-    <hr />
-    <p>Hur jobbigt var aktiviteten</p>
-    <input type="number" id="borg_scale" min="0" max="10" placeholder="Skala 1-10 1 = väldigt lätt 10 = väldigt jobbigt" required="true">
-    <hr />
-    <p>Hur långt/mycket var aktiviteten</p>
-    <input type="text" id="distance" placeholder="200 meter / 20 reps">
-    <hr />
-    <p>Hur många timmar gjorde du det</p>
-    <input type="time" id="duration" required="true">
-    <hr />
-    <br>
-    <button type="submit">Spara träning</button>
+
+    <form @submit.prevent="submitWorkout">
+      <p>När aktiviteten är gjord</p>
+      <input type="date" v-model="form.when" required />
+      <hr />
+
+      <p>Vad för aktivitet</p>
+      <input type="text" v-model="form.activity" placeholder="Skriv aktivitet här" required />
+      <hr />
+
+      <p>Info om vad du gjorde</p>
+      <input type="text" v-model="form.details" placeholder="Skriv info här" />
+      <hr />
+
+      <p>Hur jobbigt var aktiviteten (1-10)</p>
+      <input type="number" v-model.number="form.borg_scale" min="0" max="10" required />
+      <hr />
+
+      <p>Hur långt/mycket var aktiviteten</p>
+      <input type="text" v-model.number="form.distance" placeholder="200 meter / 20 reps" />
+      <hr />
+
+      <p>Hur många minuter gjorde du det</p>
+      <input type="number" v-model.number="form.duration" placeholder="Minuter" required />
+      <hr />
+
+      <button type="submit">Spara träning</button>
+    </form>
   </div>
 </template>
-
 <style scoped>
 .training-form {
   max-width: 600px;
@@ -64,6 +101,6 @@ button {
   font-size: 16px;
 }
 button:hover {
-  background-color: rgb(173, 88, 7)
+  background-color: rgb(173, 88, 7);
 }
 </style>

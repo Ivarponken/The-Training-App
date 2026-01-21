@@ -38,7 +38,7 @@ class WorkoutController extends Controller
             'activity' => 'required|string|max:255',
             'details' => 'nullable|string',
             'borg_scale' => 'required|numeric|min:0|max:10',
-            'distance' => 'nullable|numeric|min:0',
+            'distance' => 'nullable|string|min:0',
             'duration' => 'nullable|numeric|min:0',
         ]);
 
