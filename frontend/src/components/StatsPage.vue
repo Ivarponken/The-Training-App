@@ -1,87 +1,252 @@
-<script setup>
-import { reactive, ref, watch } from 'vue'
+<script>
 import VueApexCharts from 'vue3-apexcharts'
 
-const apexcharts = VueApexCharts
+export default {
+  name: 'StatsPage',
+  components: { apexchart: VueApexCharts },
 
-const form = reactive({
-  start_date: '',
-  end_date: '',
-})
-
-const statsData = reactive([])
-
-const chartLabels = ref([])
-const chartSeries = ref([])
-
-watch(
-  statsData,
-  () => {
-    chartLabels.value = statsData.map(stat => stat.activity)
-
-    chartSeries.value = [
-      {
-        name: 'Total Workouts',
-        data: statsData.map(stat => Number(stat.total_workouts) || 0),
-      },
-      {
-        name: 'Total Duration (min)',
-        data: statsData.map(stat => Number(stat.total_duration) || 0),
-      },
-      {
-        name: 'Avg Borg',
-        data: statsData.map(stat => Number(stat.avg_borg) || 0),
-      },
-    ]
+  data() {
+    return {
+      temperatures: {},
+      loading: false,
+      workoutsByDate: {},
+      startDate: '',
+      endDate: '',
+      allTime: true,
+      activities: [],
+      selectedActivity: '',
+      chartWidth: '100%',
+    }
   },
-  { deep: true }
-)
 
-function getStats() {
-const url = `http://localhost:8080/workouts/stats?start_date=${form.start_date}&end_date=${form.end_date}`
+  computed: {
+    series() {
+      const dates = Object.keys(this.workoutsByDate)
+      return [
+        {
+          name: 'Antal träningar',
+          data: dates.map((d) => this.workoutsByDate[d].count),
+          color: 'blue',
+        },
+        {
+          name: 'Total tid (min)',
+          data: dates.map((d) => this.workoutsByDate[d].totalDuration),
+          color: 'lime',
+        },
+        {
+          name: 'Borg-skala',
+          data: dates.map((d) => this.workoutsByDate[d].avgBorg),
+          color: 'red',
+        },
+      ]
+    },
 
-  fetch(url)
-    .then((res) => res.json())
-    .then((data) => {
-      statsData.splice(0, statsData.length, ...data)
-    })
-    .catch((err) => console.error(err))
+    chartOptions() {
+      const formatShort = (dateStr) => {
+        const d = new Date(dateStr)
+        const dd = String(d.getDate()).padStart(2, '0')
+        const mm = String(d.getMonth() + 1).padStart(2, '0')
+        const yy = String(d.getFullYear()).slice(-2)
+        return `${dd}/${mm}/${yy}`
+      }
+
+      return {
+        title: {
+          text: 'Träningsstatistik',
+        },
+        xaxis: {
+          type: 'category',
+          categories: Object.keys(this.workoutsByDate).map((d) => formatShort(d)),
+        },
+        yaxis: [
+          {
+            title: { text: 'Antal träningar' },
+          },
+          {
+            opposite: true,
+            title: { text: 'Total tid (min)' },
+          },
+          {
+            opposite: true,
+            title: { text: 'Borg-skala' },
+            min: 0,
+            max: 10,
+          },
+        ],
+      }
+    },
+  },
+
+  async created() {
+    // Hämta aktiviteter och initialt alla workouts
+    await this.fetchActivities()
+    await this.fetchWorkoutData()
+    this.updateChartWidth()
+    window.addEventListener('resize', this.updateChartWidth)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateChartWidth)
+  },
+
+  methods: {
+    updateChartWidth() {
+      if (window.innerWidth <= 768) {
+        this.chartWidth = '100%'
+      } else {
+        this.chartWidth = '700'
+      }
+    },
+
+    async fetchWorkoutData() {
+      let url = 'http://localhost:8080/workouts'
+      const params = new URLSearchParams()
+      if (!this.allTime && this.startDate && this.endDate) {
+        params.set('start_date', this.startDate)
+        params.set('end_date', this.endDate)
+      }
+      if (this.selectedActivity) {
+        params.set('activity', this.selectedActivity)
+      }
+      const qs = params.toString()
+      if (qs) url += `?${qs}`
+
+      this.loading = true
+      try {
+        const res = await fetch(url)
+        const data = await res.json()
+
+        let days = []
+        if (this.allTime) {
+          // hämta och sortera enligt datum
+          const set = new Set()
+          data.forEach((w) => {
+            const when = w.when || w.created_at || w.createdAt || w.date
+            if (!when) return
+            set.add(new Date(when).toISOString().slice(0, 10))
+          })
+          days = Array.from(set).sort()
+        } else {
+          // Start->slutdatum
+          const s = new Date(this.startDate)
+          const e = new Date(this.endDate)
+          for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+            days.push(new Date(d).toISOString().slice(0, 10))
+          }
+        }
+
+        const map = {}
+        days.forEach((day) => {
+          map[day] = { count: 0, totalDuration: 0, sumBorg: 0, avgBorg: 0 }
+        })
+
+        data.forEach((w) => {
+          const when = w.when || w.created_at || w.createdAt || w.date
+          if (!when) return
+          const dateKey = new Date(when).toISOString().slice(0, 10)
+          if (!map[dateKey]) return
+
+          map[dateKey].count += 1
+          map[dateKey].totalDuration += Number(w.duration) || 0
+          map[dateKey].sumBorg += Number(w.borg_scale) || 0
+        })
+
+        Object.keys(map).forEach((k) => {
+          const e = map[k]
+          e.avgBorg = e.count > 0 ? +(e.sumBorg / e.count).toFixed(2) : 0
+        })
+
+        const ordered = {}
+        days.forEach((d) => {
+          ordered[d] = map[d]
+        })
+        this.workoutsByDate = ordered
+      } catch (err) {
+        console.error('Fetch error:', err)
+      } finally {
+        this.loading = false
+      }
+    },
+    async fetchActivities() {
+      try {
+        const res = await fetch('http://localhost:8080/workouts/stats')
+        const data = await res.json()
+        this.activities = Array.isArray(data) ? data.map((r) => r.activity).filter(Boolean) : []
+      } catch (err) {
+        console.error('Failed to load activities', err)
+      }
+    },
+  },
 }
-
-const chartOptions = reactive({
-  chart: { type: 'line' },
-  title: { text: 'Statistik per workout:' },
-  dataLabels: { enabled: true },
-})
-
 </script>
+
 <template>
-  <div class="container">
-    <h1>Träningsstatistik</h1>
-
-    <div class="form-card">
-      <form @submit.prevent="getStats">
-        <div class="form-group">
-          <label for="start-date">Startdatum</label>
-          <input id="start-date" type="date" v-model="form.start_date" required />
-        </div>
-
-        <div class="form-group">
-          <label for="end-date">Slutdatum</label>
-          <input id="end-date" type="date" v-model="form.end_date" required />
-        </div>
-
-        <button type="submit" class="submit-btn">Hämta statistik</button>
-      </form>
+  <div class="stats-container">
+    <h2>Träningsstatistik</h2>
+    <div class="controls">
+      <label>
+        Start:
+        <input type="date" v-model="startDate" :disabled="allTime" />
+      </label>
+      <label>
+        Slut:
+        <input type="date" v-model="endDate" :disabled="allTime" />
+      </label>
+      <label>
+        Aktivitet:
+        <select v-model="selectedActivity">
+          <option value="">Alla aktiviteter</option>
+          <option v-for="a in activities" :key="a" :value="a">{{ a }}</option>
+        </select>
+      </label>
+      <label> <input type="checkbox" v-model="allTime" /> All tid </label>
+      <button @click.prevent="fetchWorkoutData">Uppdatera</button>
     </div>
-
-    <div v-if="statsData.length" class="chart-wrapper">
-      <apexcharts
-        type="line"
-        height="350"
-        :options="{ ...chartOptions, xaxis: { categories: chartLabels } }"
-        :series="chartSeries"
-      />
+    <div v-if="loading" class="loading">Laddar träningsdata...</div>
+    <div v-else class="chart-wrapper">
+      <apexchart :width="chartWidth" type="line" :options="chartOptions" :series="series" />
     </div>
   </div>
 </template>
+
+<style scoped>
+.stats-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.chart-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.controls label {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.loading {
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .temp-container {
+    padding: 0 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+}
+</style>
