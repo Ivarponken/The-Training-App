@@ -11,14 +11,28 @@ const form = reactive({
 
 const statsData = reactive([])
 
-const chartSeries = ref([])
 const chartLabels = ref([])
+const chartSeries = ref([])
 
 watch(
   statsData,
   () => {
-    chartSeries.value = statsData.map(stat => Number(stat.total_workouts) || 0)
     chartLabels.value = statsData.map(stat => stat.activity)
+
+    chartSeries.value = [
+      {
+        name: 'Total Workouts',
+        data: statsData.map(stat => Number(stat.total_workouts) || 0),
+      },
+      {
+        name: 'Total Duration (min)',
+        data: statsData.map(stat => Number(stat.total_duration) || 0),
+      },
+      {
+        name: 'Avg Borg',
+        data: statsData.map(stat => Number(stat.avg_borg) || 0),
+      },
+    ]
   },
   { deep: true }
 )
@@ -35,12 +49,13 @@ function getStats() {
 }
 
 const chartOptions = reactive({
-  chart: { type: 'bar' },
+  chart: { type: 'line' },
   xaxis: { categories: chartLabels.value },
   title: { text: 'Statistik per workout:' },
   plotOptions: { bar: { horizontal: false } },
   dataLabels: { enabled: true },
 })
+
 </script>
 <template>
   <div class="container">
@@ -64,7 +79,7 @@ const chartOptions = reactive({
 
     <div v-if="statsData.length" class="chart-wrapper">
       <apexcharts
-        type="bar"
+        type="line"
         height="350"
         :options="{ ...chartOptions, xaxis: { categories: chartLabels } }"
         :series="[{ name: 'Total Workouts', data: chartSeries }]"
