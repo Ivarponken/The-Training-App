@@ -38,7 +38,7 @@ watch(
 )
 
 function getStats() {
-  const url = `http://localhost:8080/workouts/stats?start_date=${form.start_date}&end_date=${form.end_date}`
+const url = `http://localhost:8080/workouts/stats?start_date=${form.start_date}&end_date=${form.end_date}`
 
   fetch(url)
     .then((res) => res.json())
@@ -50,9 +50,7 @@ function getStats() {
 
 const chartOptions = reactive({
   chart: { type: 'line' },
-  xaxis: { categories: chartLabels.value },
   title: { text: 'Statistik per workout:' },
-  plotOptions: { bar: { horizontal: false } },
   dataLabels: { enabled: true },
 })
 
@@ -82,7 +80,7 @@ const chartOptions = reactive({
         type="line"
         height="350"
         :options="{ ...chartOptions, xaxis: { categories: chartLabels } }"
-        :series="[{ name: 'Total Workouts', data: chartSeries }]"
+        :series="chartSeries"
       />
     </div>
   </div>
