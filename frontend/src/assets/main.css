@@ -21,3 +21,17 @@ h2 {
 label {
   color: #da7618;
 }
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border-color: #da7618;
+}

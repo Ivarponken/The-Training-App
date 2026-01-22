@@ -10,7 +10,11 @@
         Slutdatum:
         <input type="date" v-model="endDate">
       </label>
+      <label>
+        <button @click="generatePDF">Ladda ner som PDF</button>
+      </label>
     </div>
+
     <table>
       <thead>
         <tr>
@@ -22,6 +26,7 @@
           <th>Tid (min)</th>
         </tr>
       </thead>
+
       <tbody>
         <tr v-for="item in filteredItems" :key="item.id">
           <td>{{ item.when || '-' }}</td>
@@ -38,10 +43,13 @@
         </tr>
       </tbody>
     </table>
+
   </div>
 </template>
 
 <script>
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 export default {
   data() {
     return {
@@ -76,7 +84,33 @@ export default {
   methods: {
     borgText(val) {
       return this.borgMap[val] || null;
-    }
+    },
+    generatePDF() {
+  const doc = new jsPDF();
+  const columns = [
+    "Datum",
+    "Aktivitet",
+    "Detaljer",
+    "Borg-skala",
+    "Distans",
+    "Tid (min)"
+  ];
+  const rows = this.filteredItems.map(item => [
+    item.when || "-",
+    item.activity || "-",
+    item.details || "-",
+    this.borgText(item.borg_scale) || "-",
+    item.distance || "-",
+    item.duration || "-"
+  ]);
+  doc.text("Lista från databasen", 14, 16);
+  autoTable(doc, {
+    head: [columns],
+    body: rows,
+    startY: 20
+  });
+  doc.save("lista.pdf");
+},
   },
   mounted() {
     fetch('http://localhost:8080/workouts')
@@ -126,17 +160,18 @@ th {
 tr:last-child td {
   border-bottom: none;
 }
-input {
-  width: 100%;
-  padding: 10px;
-  border: 2px solid #ddd;
+button {
+  background-color: #da7618;
+  color: white;
+  padding: 10px 20px;
+  border: none;
   border-radius: 4px;
+  width: 100%;
+  cursor: pointer;
   font-size: 16px;
-  box-sizing: border-box;
+  margin-top: 25px;
 }
-
-input:focus {
-  outline: none;
-  border-color: #da7618;
+button:hover {
+  background-color: rgb(173, 88, 7);
 }
 </style>
