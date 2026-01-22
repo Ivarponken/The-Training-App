@@ -118,10 +118,9 @@ class WorkoutController extends Controller
             $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
         }
 
-        $stats = $query->selectRaw('activity, COUNT(*) as total_workouts, SUM(distance) as total_distance, SUM(duration) as total_duration, AVG(borg_scale) as avg_borg')
-            ->groupBy('activity')
-            ->get();
-
+        $stats = $query->selectRaw('activity, COUNT(*) as total_workouts, SUM(duration) as total_duration, AVG(borg_scale) as avg_borg')
+    ->groupBy('activity')
+    ->get();
         return response()->json($stats);
     }
 }

@@ -1,10 +1,12 @@
 <script setup>
+import StatsPage from '@/components/StatsPage.vue';
+
 </script>
 
 <template>
 
 
     <main>
-      <p>stats</p>
+      <StatsPage />
     </main>
 </template>
