@@ -110,17 +110,23 @@ class WorkoutController extends Controller
     }
 
     // Få statistik på total antal träning, distans, tid, borg
-    public function stats(Request $request)
-    {
-        $query = Workout::query();
+   public function stats(Request $request)
+{
+    $query = Workout::query();
 
-        if ($request->start_date && $request->end_date) {
-            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
-        }
+    if ($request->activity) {
+        $query->where('activity', $request->activity);
+    }
 
-        $stats = $query->selectRaw('activity, COUNT(*) as total_workouts, SUM(duration) as total_duration, AVG(borg_scale) as avg_borg')
+    $stats = $query->selectRaw('
+        activity,
+        COUNT(*) as total_workouts,
+        SUM(duration) as total_duration,
+        AVG(borg_scale) as avg_borg
+    ')
     ->groupBy('activity')
     ->get();
-        return response()->json($stats);
-    }
+
+    return response()->json($stats);
+}
 }
