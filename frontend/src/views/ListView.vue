@@ -1,9 +1,11 @@
 <script setup>
+import ListPage from '@/components/ListPage.vue';
+
 </script>
 
 <template>
   <div class="home-view">
-    <p>list</p>
+    <ListPage />
   </div>
 </template>
 

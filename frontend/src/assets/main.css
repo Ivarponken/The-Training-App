@@ -14,3 +14,10 @@ a,
     border-radius: 7px;
   }
 }
+h2 {
+  color: #da7618;
+  font-weight: bold;
+}
+label {
+  color: #da7618;
+}

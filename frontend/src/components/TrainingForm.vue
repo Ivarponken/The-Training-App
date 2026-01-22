@@ -39,27 +39,21 @@ function submitWorkout() {
     <form @submit.prevent="submitWorkout">
       <p>När aktiviteten är gjord</p>
       <input type="date" v-model="form.when" required />
-      <hr />
 
       <p>Vad för aktivitet</p>
       <input type="text" v-model="form.activity" placeholder="Skriv aktivitet här" required />
-      <hr />
 
       <p>Info om vad du gjorde</p>
       <input type="text" v-model="form.details" placeholder="Skriv info här" />
-      <hr />
 
       <p>Hur jobbigt var aktiviteten (1-10)</p>
       <input type="number" v-model.number="form.borg_scale" min="0" max="10" required />
-      <hr />
 
       <p>Hur långt/mycket var aktiviteten</p>
       <input type="text" v-model="form.distance" placeholder="200 meter / 20 reps" />
-      <hr />
 
       <p>Hur många minuter gjorde du det</p>
       <input type="number" v-model.number="form.duration" placeholder="Minuter" required />
-      <hr />
 
       <button type="submit">Spara träning</button>
     </form>
@@ -67,16 +61,13 @@ function submitWorkout() {
 </template>
 <style scoped>
 .training-form {
-  max-width: 600px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
   background: #f0f0f0;
   border-radius: 8px;
 }
 
-h2 {
-  color: #da7618;
-}
 input {
   width: 100%;
   padding: 10px;
@@ -99,6 +90,7 @@ button {
   width: 100%;
   cursor: pointer;
   font-size: 16px;
+  margin-top: 20px;
 }
 button:hover {
   background-color: rgb(173, 88, 7);
