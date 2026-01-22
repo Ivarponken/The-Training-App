@@ -68,19 +68,6 @@ function submitWorkout() {
   border-radius: 8px;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-
-input:focus {
-  outline: none;
-  border-color: #da7618;
-}
 button {
   background-color: #da7618;
   color: white;
