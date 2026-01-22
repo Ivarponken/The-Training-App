@@ -13,6 +13,9 @@ class WorkoutController extends Controller
     {
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
+        $activity = $request->input('activity');
+
+        $query = Workout::query();
 
         if ($startDate && $endDate) {
             // om start eller slutdatum inte finns eller slut är före start skicka error
@@ -21,13 +24,15 @@ class WorkoutController extends Controller
                     'Error' => 'start_date and/or end_date invalid/missing'
                 ], 400);
             }
-            // Hämtar träningar från ett visst intervall
-            return Workout::whereBetween('created_at', [$startDate, $endDate])
-                ->orderBy('when', 'desc')
-                ->get();
+            // Filtrera inom intervall (created_at)
+            $query->whereBetween('created_at', [$startDate, $endDate]);
         }
-        // Hämtar alla träningar om datum inte finns
-        return Workout::orderBy('when', 'desc')->get();
+
+        if ($activity) {
+            $query->where('activity', $activity);
+        }
+
+        return $query->orderBy('when', 'desc')->get();
     }
 
     public function store(Request $request)

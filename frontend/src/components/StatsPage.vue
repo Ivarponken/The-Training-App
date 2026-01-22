@@ -9,112 +9,77 @@ export default {
     return {
       temperatures: {},
       loading: false,
-      // keyed by YYYY-MM-DD -> { count, totalDuration, sumBorg, avgBorg }
       workoutsByDate: {},
-      // range controls
       startDate: '',
       endDate: '',
       allTime: true,
-      chartWidth: '100%', // Dynamisk bredd
+      activities: [],
+      selectedActivity: '',
+      chartWidth: '100%',
     }
   },
 
   computed: {
     series() {
-      // Order of series maps to yaxis entries in chartOptions
       const dates = Object.keys(this.workoutsByDate)
       return [
         {
-          name: 'Total workouts',
+          name: 'Antal träningar',
           data: dates.map((d) => this.workoutsByDate[d].count),
-          color: '#1f77b4',
+          color: 'blue',
         },
         {
-          name: 'Total duration (min)',
+          name: 'Total tid (min)',
           data: dates.map((d) => this.workoutsByDate[d].totalDuration),
-          color: '#ff7f0e',
+          color: 'lime',
         },
         {
-          name: 'Avg Borg',
+          name: 'Borg-skala',
           data: dates.map((d) => this.workoutsByDate[d].avgBorg),
-          color: '#2ca02c',
+          color: 'red',
         },
       ]
     },
 
     chartOptions() {
-      const isMobile = window.innerWidth <= 768
+      const formatShort = (dateStr) => {
+        const d = new Date(dateStr)
+        const dd = String(d.getDate()).padStart(2, '0')
+        const mm = String(d.getMonth() + 1).padStart(2, '0')
+        const yy = String(d.getFullYear()).slice(-2)
+        return `${dd}/${mm}/${yy}`
+      }
 
       return {
-        chart: {
-          zoom: { enabled: false },
-          toolbar: { show: !isMobile }, // Dölj toolbar på mobil
-        },
         title: {
-          text: 'Träningsstatistik (sista 10 dagarna)',
-          style: {
-            fontSize: isMobile ? '16px' : '18px',
-          },
+          text: 'Träningsstatistik',
         },
         xaxis: {
-          categories: Object.keys(this.workoutsByDate).map((date) => {
-            const d = new Date(date)
-            const day = d.getDate()
-            const months = [
-              'jan',
-              'feb',
-              'mar',
-              'apr',
-              'maj',
-              'jun',
-              'jul',
-              'aug',
-              'sep',
-              'okt',
-              'nov',
-              'dec',
-            ]
-            const month = months[d.getMonth()]
-            return `${day} ${month}`
-          }),
-          labels: {
-            rotate: -45,
-            rotateAlways: isMobile, // Rotera alltid på mobil
-            style: {
-              fontSize: isMobile ? '10px' : '12px',
-            },
-          },
+          type: 'category',
+          categories: Object.keys(this.workoutsByDate).map((d) => formatShort(d)),
         },
         yaxis: [
           {
-            title: { text: 'Antal träningar', style: { fontSize: isMobile ? '12px' : '14px' } },
-            labels: { style: { fontSize: isMobile ? '10px' : '12px' } },
+            title: { text: 'Antal träningar' },
           },
           {
             opposite: true,
-            title: { text: 'Total tid (min)', style: { fontSize: isMobile ? '12px' : '14px' } },
-            labels: { style: { fontSize: isMobile ? '10px' : '12px' } },
+            title: { text: 'Total tid (min)' },
           },
           {
             opposite: true,
-            title: { text: 'Genomsnittlig Borg', style: { fontSize: isMobile ? '12px' : '14px' } },
-            labels: { style: { fontSize: isMobile ? '10px' : '12px' } },
+            title: { text: 'Borg-skala' },
             min: 0,
             max: 10,
           },
         ],
-        legend: {
-          fontSize: isMobile ? '12px' : '14px',
-        },
-        stroke: {
-          width: isMobile ? 2 : 3, // Tunnare linjer på mobil
-        },
       }
     },
   },
 
   async created() {
-    // initial load: all time
+    // Hämta aktiviteter och initialt alla workouts
+    await this.fetchActivities()
     await this.fetchWorkoutData()
     this.updateChartWidth()
     window.addEventListener('resize', this.updateChartWidth)
@@ -126,7 +91,6 @@ export default {
 
   methods: {
     updateChartWidth() {
-      // Sätt bredd baserat på skärmstorlek
       if (window.innerWidth <= 768) {
         this.chartWidth = '100%'
       } else {
@@ -135,22 +99,26 @@ export default {
     },
 
     async fetchWorkoutData() {
-      // Build URL with optional date range
       let url = 'http://localhost:8080/workouts'
+      const params = new URLSearchParams()
       if (!this.allTime && this.startDate && this.endDate) {
-        const params = new URLSearchParams({ start_date: this.startDate, end_date: this.endDate })
-        url += `?${params.toString()}`
+        params.set('start_date', this.startDate)
+        params.set('end_date', this.endDate)
       }
+      if (this.selectedActivity) {
+        params.set('activity', this.selectedActivity)
+      }
+      const qs = params.toString()
+      if (qs) url += `?${qs}`
 
       this.loading = true
       try {
         const res = await fetch(url)
         const data = await res.json()
 
-        // Determine date keys in order
         let days = []
         if (this.allTime) {
-          // collect unique dates present in data, sorted ascending
+          // hämta och sortera enligt datum
           const set = new Set()
           data.forEach((w) => {
             const when = w.when || w.created_at || w.createdAt || w.date
@@ -159,7 +127,7 @@ export default {
           })
           days = Array.from(set).sort()
         } else {
-          // build full range from startDate to endDate
+          // Start->slutdatum
           const s = new Date(this.startDate)
           const e = new Date(this.endDate)
           for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
@@ -188,7 +156,6 @@ export default {
           e.avgBorg = e.count > 0 ? +(e.sumBorg / e.count).toFixed(2) : 0
         })
 
-        // maintain insertion order by creating a new object from days
         const ordered = {}
         days.forEach((d) => {
           ordered[d] = map[d]
@@ -198,6 +165,15 @@ export default {
         console.error('Fetch error:', err)
       } finally {
         this.loading = false
+      }
+    },
+    async fetchActivities() {
+      try {
+        const res = await fetch('http://localhost:8080/workouts/stats')
+        const data = await res.json()
+        this.activities = Array.isArray(data) ? data.map((r) => r.activity).filter(Boolean) : []
+      } catch (err) {
+        console.error('Failed to load activities', err)
       }
     },
   },
@@ -217,8 +193,13 @@ export default {
         <input type="date" v-model="endDate" :disabled="allTime" />
       </label>
       <label>
-        <input type="checkbox" v-model="allTime" /> All tid
+        Aktivitet:
+        <select v-model="selectedActivity">
+          <option value="">Alla aktiviteter</option>
+          <option v-for="a in activities" :key="a" :value="a">{{ a }}</option>
+        </select>
       </label>
+      <label> <input type="checkbox" v-model="allTime" /> All tid </label>
       <button @click.prevent="fetchWorkoutData">Uppdatera</button>
     </div>
     <div v-if="loading" class="loading">Laddar träningsdata...</div>
