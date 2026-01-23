@@ -35,3 +35,26 @@ input:focus {
   outline: none;
   border-color: #da7618;
 }
+select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+  background: #fff;
+  color: #333;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select:focus {
+  outline: none;
+  border-color: #da7618;
+}
+
+option {
+  color: #333;
+  background: #fff;
+}
