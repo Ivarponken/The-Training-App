@@ -16,6 +16,7 @@ export default {
       activities: [],
       selectedActivity: '',
       chartWidth: '100%',
+      chartHeight: '60vh',
     }
   },
 
@@ -91,10 +92,16 @@ export default {
 
   methods: {
     updateChartWidth() {
-      if (window.innerWidth <= 768) {
-        this.chartWidth = '100%'
+      this.chartWidth = '100%'
+      const w = window.innerWidth
+      if (w > 1200) {
+        this.chartHeight = '75vh'
+      } else if (w > 768) {
+        this.chartHeight = '65vh'
+      } else if (w > 420) {
+        this.chartHeight = '55vh'
       } else {
-        this.chartWidth = '700'
+        this.chartHeight = '72vh'
       }
     },
 
@@ -183,28 +190,34 @@ export default {
 <template>
   <div class="stats-container">
     <h2>Träningsstatistik</h2>
-    <div class="controls">
-      <label>
-        Start:
-        <input type="date" v-model="startDate" :disabled="allTime" />
-      </label>
-      <label>
-        Slut:
-        <input type="date" v-model="endDate" :disabled="allTime" />
-      </label>
-      <label>
-        Aktivitet:
-        <select v-model="selectedActivity">
-          <option value="">Alla aktiviteter</option>
-          <option v-for="a in activities" :key="a" :value="a">{{ a }}</option>
-        </select>
-      </label>
-      <label> <input type="checkbox" v-model="allTime" /> All tid </label>
-      <button @click.prevent="fetchWorkoutData">Uppdatera</button>
-    </div>
-    <div v-if="loading" class="loading">Laddar träningsdata...</div>
-    <div v-else class="chart-wrapper">
-      <apexchart :width="chartWidth" type="line" :options="chartOptions" :series="series" />
+
+    <div class="stats-content">
+      <aside class="controls">
+        <label>
+          Start:
+          <input type="date" v-model="startDate" :disabled="allTime" />
+        </label>
+        <label>
+          Slut:
+          <input type="date" v-model="endDate" :disabled="allTime" />
+        </label>
+        <label>
+          Aktivitet:
+          <select v-model="selectedActivity">
+            <option value="">Alla aktiviteter</option>
+            <option v-for="a in activities" :key="a" :value="a">{{ a }}</option>
+          </select>
+        </label>
+        <label> <input type="checkbox" v-model="allTime" /> All tid </label>
+        <button @click.prevent="fetchWorkoutData">Uppdatera</button>
+      </aside>
+
+      <main class="chart-area">
+        <div v-if="loading" class="loading">Laddar träningsdata...</div>
+        <div v-else class="chart-wrapper">
+          <apexchart :width="chartWidth" type="line" :options="chartOptions" :series="series" />
+        </div>
+      </main>
     </div>
   </div>
 </template>
@@ -247,6 +260,38 @@ export default {
   h2 {
     font-size: 1.1rem;
     margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .stats-content {
+    flex-direction: column;
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 95%;
+    margin-bottom: 1rem;
+  }
+
+  .controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .controls input,
+  .controls select,
+  .controls button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .controls button {
+    padding: 0.6rem 0.75rem;
   }
 }
 </style>
