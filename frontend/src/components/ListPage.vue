@@ -16,16 +16,21 @@
     </div>
 
     <table>
-      <thead>
-        <tr>
-          <th>Datum</th>
-          <th>Aktivitet</th>
-          <th>Detaljer</th>
-          <th>Borg-skala</th>
-          <th>Distans</th>
-          <th>Tid (min)</th>
-        </tr>
-      </thead>
+      <tbody>
+  <tr v-for="item in filteredItems" :key="item.id">
+    <td data-label="Datum">{{ item.when || '-' }}</td>
+    <td data-label="Aktivitet">{{ item.activity || '-' }}</td>
+    <td data-label="Detaljer">{{ item.details || '-' }}</td>
+    <td data-label="Borg-skala">
+      <span v-if="borgText(item.borg_scale)">
+        {{ borgText(item.borg_scale) }}
+      </span>
+      <span v-else>-</span>
+    </td>
+    <td data-label="Distans">{{ item.distance || '-' }}</td>
+    <td data-label="Tid (min)">{{ item.duration || '-' }}</td>
+  </tr>
+</tbody>
 
       <tbody>
         <tr v-for="item in filteredItems" :key="item.id">
@@ -152,6 +157,9 @@ th, td {
   padding: 12px 8px;
   text-align: left;
   border-bottom: 1px solid #da7618;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 200px;
 }
 th {
   background: #ffffff;
@@ -173,5 +181,46 @@ button {
 }
 button:hover {
   background-color: rgb(173, 88, 7);
+}
+@media (max-width: 700px) {
+  .lista {
+    padding: 5px;
+  }
+  .date-filter {
+    flex-direction: column;
+    gap: 8px;
+  }
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+  thead {
+    display: none;
+  }
+  tr {
+    margin-bottom: 16px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    padding: 8px 0;
+  }
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+    min-height: 32px;
+    max-width: none;
+    word-break: break-word;
+  }
+  td:before {
+    position: absolute;
+    left: 8px;
+    top: 12px;
+    width: 45%;
+    white-space: pre-wrap;
+    font-weight: bold;
+    color: #da7618;
+    content: attr(data-label);
+  }
 }
 </style>
