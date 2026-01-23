@@ -16,7 +16,7 @@ export default {
       activities: [],
       selectedActivity: '',
       chartWidth: '100%',
-      chartHeight: '30vh',
+      chartHeight: '60vh',
     }
   },
 
@@ -99,9 +99,9 @@ export default {
       } else if (w > 768) {
         this.chartHeight = '65vh'
       } else if (w > 420) {
-        this.chartHeight = '500px'
+        this.chartHeight = '55vh'
       } else {
-        this.chartHeight = '450px'
+        this.chartHeight = '72vh'
       }
     },
 
@@ -215,7 +215,7 @@ export default {
       <main class="chart-area">
         <div v-if="loading" class="loading">Laddar träningsdata...</div>
         <div v-else class="chart-wrapper">
-          <apexchart :width="chartWidth" :height="chartHeight" type="line" :options="chartOptions" :series="series" />
+          <apexchart :width="chartWidth" type="line" :options="chartOptions" :series="series" />
         </div>
       </main>
     </div>
@@ -223,7 +223,8 @@ export default {
 </template>
 
 <style scoped>
-button {
+
+  button {
   background-color: #da7618;
   color: white;
   padding: 10px 20px;
@@ -310,3 +311,4 @@ button:hover {
   }
 }
 </style>
+ this works
