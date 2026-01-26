@@ -9,8 +9,7 @@ import { RouterLink, RouterView } from 'vue-router'
       <RouterLink to="/">Träningar</RouterLink>
       <RouterLink to="/lista">Lista</RouterLink>
       <RouterLink to="/stats">Statistik</RouterLink>
-      <p style="cursor: pointer;">SE</p>
-      <p style="cursor: pointer;">ENG</p>
+
     </nav>
 
     <main>
