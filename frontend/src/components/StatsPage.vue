@@ -12,7 +12,6 @@ export default {
       workoutsByDate: {},
       startDate: '',
       endDate: '',
-      allTime: true,
       activities: [],
       selectedActivity: '',
       chartWidth: '100%',
@@ -75,6 +74,9 @@ export default {
           },
         ],
       }
+    },
+    allTime() {
+      return !(this.startDate && this.endDate)
     },
   },
 
@@ -195,11 +197,11 @@ export default {
       <aside class="controls">
         <label>
           Start:
-          <input type="date" v-model="startDate" :disabled="allTime" />
+          <input type="date" v-model="startDate" />
         </label>
         <label>
           Slut:
-          <input type="date" v-model="endDate" :disabled="allTime" />
+          <input type="date" v-model="endDate" />
         </label>
         <label>
           Aktivitet:
@@ -208,14 +210,13 @@ export default {
             <option v-for="a in activities" :key="a" :value="a">{{ a }}</option>
           </select>
         </label>
-        <label> <input type="checkbox" v-model="allTime" /> All tid </label>
         <button @click.prevent="fetchWorkoutData">Uppdatera</button>
       </aside>
 
       <main class="chart-area">
         <div v-if="loading" class="loading">Laddar träningsdata...</div>
         <div v-else class="chart-wrapper">
-          <apexchart :width="chartWidth" type="line" :options="chartOptions" :series="series" />
+          <apexchart :width="chartWidth" type="bar" :options="chartOptions" :series="series" />
         </div>
       </main>
     </div>
@@ -230,14 +231,15 @@ export default {
   padding: 10px 20px;
   border: none;
   border-radius: 4px;
-  width: 100%;
+  width: 20%;
   cursor: pointer;
   font-size: 16px;
-  margin-top: 25px;
 }
+
 button:hover {
   background-color: rgb(173, 88, 7);
 }
+
 .stats-container {
   width: 100%;
   max-width: 1200px;
