@@ -26,17 +26,17 @@ export default {
         {
           name: 'Antal träningar',
           data: dates.map((d) => this.workoutsByDate[d].count),
-          color: 'blue',
+          color: 'darkblue',
         },
         {
           name: 'Total tid (min)',
           data: dates.map((d) => this.workoutsByDate[d].totalDuration),
-          color: 'lime',
+          color: 'green',
         },
         {
           name: 'Borg-skala',
           data: dates.map((d) => this.workoutsByDate[d].avgBorg),
-          color: 'red',
+          color: 'orange',
         },
       ]
     },
