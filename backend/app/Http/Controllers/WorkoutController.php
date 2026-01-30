@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Workout;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -41,11 +40,11 @@ class WorkoutController extends Controller
         // Validation på vad användaren skickat in i olika fälten
         $validator = Validator::make($request->all(), [
             'when' => 'required|date',
-            'activity' => 'required|string|max:255',
-            'details' => 'nullable|string',
-            'borg_scale' => 'required|numeric|min:0|max:10',
-            'distance' => 'nullable|string',
-            'duration' => 'nullable|numeric|min:0',
+            'activity' => 'required|string|max:255|regex:/^[a-zA-ZåäöÅÄÖ0-9\s\-]+$/u',
+            'details' => 'nullable|string|max:1000',
+            'borg_scale' => 'required|numeric|min:1|max:10',
+            'distance' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9åäöÅÄÖ\s\-\/]+$/u',
+            'duration' => 'required|numeric|min:0|max:1440',
             'image_path' => 'nullable|string|max:255'
         ]);
 
@@ -54,16 +53,19 @@ class WorkoutController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
+        // Sanitera input ytterligare (ta bort HTML/script-taggar)
+        $data = [
+            'when' => $request->when,
+            'activity' => strip_tags($request->activity),
+            'details' => strip_tags($request->details),
+            'borg_scale' => $request->borg_scale,
+            'distance' => strip_tags($request->distance),
+            'duration' => $request->duration,
+            'image_path' => $request->image_path
+        ];
+
         // Skapa träning
-        $workout = Workout::create($request->only([
-            'when',
-            'activity',
-            'details',
-            'borg_scale',
-            'distance',
-            'duration',
-            'image_path'
-        ]));
+        $workout = Workout::create($data);
 
         return response()->json($workout, 201);
     }
@@ -90,15 +92,31 @@ class WorkoutController extends Controller
             return response()->json(['error' => 'Workout not found'], 404);
         }
 
+        // Validation på uppdaterade fält
+        $validator = Validator::make($request->all(), [
+            'when' => 'sometimes|date',
+            'activity' => 'sometimes|string|max:255|regex:/^[a-zA-ZåäöÅÄÖ0-9\s\-]+$/u',
+            'details' => 'nullable|string|max:1000',
+            'borg_scale' => 'sometimes|numeric|min:1|max:10',
+            'distance' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9åäöÅÄÖ\s\-\/]+$/u',
+            'duration' => 'sometimes|numeric|min:0|max:1440'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // Sanitera input innan uppdatering
+        $data = [];
+        if ($request->has('when')) $data['when'] = $request->when;
+        if ($request->has('activity')) $data['activity'] = strip_tags($request->activity);
+        if ($request->has('details')) $data['details'] = strip_tags($request->details);
+        if ($request->has('borg_scale')) $data['borg_scale'] = $request->borg_scale;
+        if ($request->has('distance')) $data['distance'] = strip_tags($request->distance);
+        if ($request->has('duration')) $data['duration'] = $request->duration;
+
         // Uppdatera endast dessa poster:
-        $workout->update($request->only([
-            'when',
-            'activity',
-            'details',
-            'borg_scale',
-            'distance',
-            'duration'
-        ]));
+        $workout->update($data);
 
         return response()->json($workout);
     }
@@ -124,10 +142,11 @@ class WorkoutController extends Controller
 
         return response()->json(['message' => 'Workout deleted successfully']);
     }
+
     // Få statistik på total antal träning, distans, tid, borg
     public function stats(Request $request)
     {
-        $query = Workout::query();
+            $query = Workout::query();
 
         if ($request->activity) {
             $query->where('activity', $request->activity);
