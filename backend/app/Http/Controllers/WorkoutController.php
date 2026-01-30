@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Workout;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -43,7 +44,7 @@ class WorkoutController extends Controller
             'activity' => 'required|string|max:255',
             'details' => 'nullable|string',
             'borg_scale' => 'required|numeric|min:0|max:10',
-            'distance' => 'nullable|string|min:0',
+            'distance' => 'nullable|string',
             'duration' => 'nullable|numeric|min:0',
             'image_path' => 'nullable|string|max:255'
         ]);
@@ -111,11 +112,18 @@ class WorkoutController extends Controller
             return response()->json(['error' => 'Workout not found'], 404);
         }
 
+        // Ta bort bilden om den finns
+        if ($workout->image_path) {
+            $fullPath = base_path('public/' . $workout->image_path);
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+        }
+
         $workout->delete();
 
         return response()->json(['message' => 'Workout deleted successfully']);
     }
-
     // Få statistik på total antal träning, distans, tid, borg
     public function stats(Request $request)
     {
