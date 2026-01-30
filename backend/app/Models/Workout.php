@@ -12,6 +12,7 @@ class Workout extends Model
         'details',
         'borg_scale',
         'distance',
-        'duration'
+        'duration',
+        'image_path'
     ];
 }

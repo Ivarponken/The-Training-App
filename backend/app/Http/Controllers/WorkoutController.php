@@ -45,6 +45,7 @@ class WorkoutController extends Controller
             'borg_scale' => 'required|numeric|min:0|max:10',
             'distance' => 'nullable|string|min:0',
             'duration' => 'nullable|numeric|min:0',
+            'image_path' => 'nullable|string|max:255'
         ]);
 
         // Ifall validationen misslyckas skicka error
@@ -59,7 +60,8 @@ class WorkoutController extends Controller
             'details',
             'borg_scale',
             'distance',
-            'duration'
+            'duration',
+            'image_path'
         ]));
 
         return response()->json($workout, 201);
@@ -115,23 +117,23 @@ class WorkoutController extends Controller
     }
 
     // Få statistik på total antal träning, distans, tid, borg
-   public function stats(Request $request)
-{
-    $query = Workout::query();
+    public function stats(Request $request)
+    {
+        $query = Workout::query();
 
-    if ($request->activity) {
-        $query->where('activity', $request->activity);
-    }
+        if ($request->activity) {
+            $query->where('activity', $request->activity);
+        }
 
-    $stats = $query->selectRaw('
+        $stats = $query->selectRaw('
         activity,
         COUNT(*) as total_workouts,
         SUM(duration) as total_duration,
         AVG(borg_scale) as avg_borg
     ')
-    ->groupBy('activity')
-    ->get();
+            ->groupBy('activity')
+            ->get();
 
-    return response()->json($stats);
-}
+        return response()->json($stats);
+    }
 }

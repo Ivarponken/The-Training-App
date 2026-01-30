@@ -28,3 +28,23 @@ $router->get('/workouts/{id}', 'WorkoutController@show');
 $router->post('/workouts', 'WorkoutController@store');
 $router->patch('/workouts/{id}', 'WorkoutController@update');
 $router->delete('/workouts/{id}', 'WorkoutController@delete');
+
+$router->post('/upload_image', function () use ($router) {
+    $request = $router->app->make('request');
+
+    if (!$request->hasFile('image')) {
+        return response()->json(['success' => false, 'message' => 'No file']);
+    }
+
+    $file = $request->file('image');
+    $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+
+    $uploadDir = base_path('public/storage/uploads');
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+
+    $file->move($uploadDir, $filename);
+
+    return response()->json(['success' => true, 'path' => 'storage/uploads/' . $filename]);
+});
