@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 const form = reactive({
   when: '',
@@ -8,9 +8,42 @@ const form = reactive({
   borg_scale: 0,
   distance: 0,
   duration: 0,
+  image_path: null
 })
 
-function submitWorkout() {
+const image = ref(null)
+const preview = ref(null)
+
+function handleImage(e) {
+  const file = e.target.files[0]
+  if (!file) return
+
+  image.value = file
+  preview.value = URL.createObjectURL(file)
+}
+
+async function submitWorkout() {
+  // Upload image first if exists
+  if (image.value) {
+    const formData = new FormData()
+    formData.append('image', image.value)
+
+    try {
+      const res = await fetch('http://localhost:8080/upload_image', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await res.json()
+      if (data.success) {
+        form.image_path = data.path
+      }
+    } catch (err) {
+      console.error('Image upload failed:', err)
+    }
+  }
+
+  // Save workout
   fetch('http://localhost:8080/workouts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -26,6 +59,9 @@ function submitWorkout() {
       form.borg_scale = 0
       form.distance = 0
       form.duration = 0
+      form.image_path = null
+      image.value = null
+      preview.value = null
     })
     .catch((err) => console.error(err))
 }
@@ -54,6 +90,11 @@ function submitWorkout() {
 
       <p>Hur många minuter gjorde du det</p>
       <input type="number" v-model.number="form.duration" placeholder="Minuter" required />
+
+      <p>Bild (valfritt)</p>
+      <input type="file" @change="handleImage" accept="image/*" />
+      <img v-if="preview" :src="preview" style="max-width: 200px; margin-top: 10px; border-radius: 8px;" />
+
 
       <button type="submit">Spara träning</button>
     </form>

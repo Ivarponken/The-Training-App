@@ -24,6 +24,7 @@
           <th>Borg-skala</th>
           <th>Distans</th>
           <th>Tid (min)</th>
+          <th>Bild</th>
           <th>Åtgärd</th>
         </tr>
       </thead>
@@ -40,6 +41,13 @@
     </td>
     <td data-label="Distans">{{ item.distance || '-' }}</td>
     <td data-label="Tid (min)">{{ item.duration || '-' }}</td>
+    <td data-label="Bild">
+  <img v-if="item.image_path"
+       :src="`http://localhost:8080/${item.image_path}`"
+       alt="Träningsbild"
+       class="workout-image" />
+  <span v-else>-</span>
+</td>
     <td data-label="Åtgärd">
       <button class="delete-btn" @click="confirmDelete(item.id)">Ta bort</button>
     </td>
@@ -97,7 +105,8 @@ export default {
     "Detaljer",
     "Borg-skala",
     "Distans",
-    "Tid (min)"
+    "Tid (min)",
+    "Bild"
   ];
   const rows = this.filteredItems.map(item => [
     item.when || "-",
@@ -245,6 +254,27 @@ button:hover {
     font-weight: bold;
     color: #da7618;
     content: attr(data-label);
+  }
+}
+.workout-image {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.workout-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* För mobil */
+@media (max-width: 700px) {
+  .workout-image {
+    max-width: 100%;
+    max-height: 200px;
   }
 }
 </style>
