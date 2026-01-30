@@ -5,9 +5,9 @@ const form = reactive({
   when: '',
   activity: '',
   details: '',
-  borg_scale: 0,
-  distance: 0,
-  duration: 0,
+  borg_scale: '',
+  distance: '',
+  duration: '',
   image_path: null
 })
 
@@ -83,7 +83,7 @@ async function submitWorkout() {
       <input type="text" v-model="form.details" placeholder="Skriv info här" />
 
       <p>Hur jobbigt var aktiviteten (1-10)</p>
-      <input type="number" v-model.number="form.borg_scale" min="0" max="10" required />
+      <input type="number" v-model.number="form.borg_scale" min="0" max="10" placeholder="1-10" required />
 
       <p>Hur långt/mycket var aktiviteten</p>
       <input type="text" v-model="form.distance" placeholder="200 meter / 20 reps" />
@@ -94,8 +94,6 @@ async function submitWorkout() {
       <p>Bild (valfritt)</p>
       <input type="file" @change="handleImage" accept="image/*" />
       <img v-if="preview" :src="preview" style="max-width: 200px; margin-top: 10px; border-radius: 8px;" />
-
-
       <button type="submit">Spara träning</button>
     </form>
   </div>
